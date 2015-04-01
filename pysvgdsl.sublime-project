@@ -1,0 +1,11 @@
+{
+	"folders":
+	[
+		{
+			"path": "."
+		},
+        {
+            "path": "~/.virtualenvs/pysvgdsl/lib/python2.7/site-packages/rx"
+        }
+	]
+}
