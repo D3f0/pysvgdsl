@@ -32,8 +32,6 @@ class SVG(object):
         self.etree = etree.parse(path)
         self._node_cache = {}
 
-    def elements(self):
-        pass
 
     def __getitem__(self, element_id):
         """
