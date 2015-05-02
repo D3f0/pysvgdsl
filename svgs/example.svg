@@ -57,21 +57,21 @@
      id="layer1"
      transform="translate(-100,-18.076471)">
     <rect
-       id="rect2985"
+       id="rect1"
        width="574.28571"
        height="328.57144"
        x="100"
        y="18.076471"
        style="fill:#800000" />
     <rect
-       id="rect2987"
+       id="rect2"
        width="217.14285"
        height="122.85714"
        x="437.14285"
        y="186.6479"
        style="fill:#d35f5f" />
     <rect
-       id="rect2989"
+       id="rect3"
        width="160"
        height="71.428574"
        x="391.42856"
