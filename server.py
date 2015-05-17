@@ -1,6 +1,7 @@
 from __future__ import print_function
 from multiprocessing import Process, Queue
 from twisted.web import static, server, resource
+from twisted.internet.error import CannotListenError
 import os
 import atexit
 
@@ -8,27 +9,26 @@ import atexit
 server_process = None
 
 
-class RetryingConnectionSite(server.Site):
-    def startFactory(self, *args):
-        print("startFactory")
-        server.Site.startFactory(self, *args)
-
-    def stopFactory(self, *args):
-        print("stopFactory")
-        server.Site.stopFactory(self, *args)
-
-
-def _webserver(port, outqueue):
+def _webserver(port, outqueue, maxtries=None):
     """Starts a webserver in port"""
     from twisted.internet import reactor
+    if maxtries is None:
+        maxtries = 20
 
-    import atexit
+    connected = False
 
-    atexit.register(print, "Server shutdown")
     root = resource.Resource()
     root.putChild("static", static.File(os.path.join(os.getcwd(), 'static')))
-    reactor.listenTCP(port, RetryingConnectionSite(root))
-    reactor.callLater(0, outqueue.put, port)
+    while maxtries and not connected:
+        try:
+            reactor.listenTCP(port, server.Site(root))
+            connected = True
+
+        except CannotListenError:
+            maxtries -= 1
+            port += 1
+
+    reactor.callLater(0, outqueue.put, (connected, port))
     reactor.run()
 
 
@@ -36,10 +36,11 @@ def start_webserver(inital_port=6543, wait_until_started=True):
     """Starts werbserver in another process.
     Waits until completed
     @param wait_until_started Blocks until webserver is started
-    @return True if server is started, False if it's already started
+    @return (connected, port)
     """
+
     global server_process
-    if server_process.is_alive():
+    if server_process is not None and server_process.is_alive():
         return False
     queue = Queue(1)
     server_process = Process(
@@ -51,16 +52,18 @@ def start_webserver(inital_port=6543, wait_until_started=True):
     )
     server_process.start()
     if wait_until_started:
-        queue.get()
-    return True
+        connected, port = queue.get()
+    atexit.register(stop_server)
+
+    return connected, port
+
 
 def stop_server():
     """Stop webserver"""
     global server_process
-    if not server_process:
+    if server_process is None:
         return
     # This functions seems to be inoffensive if the process has exited
-    print("Killing server...")
     server_process.terminate()
 
 atexit.register(stop_server)
@@ -68,8 +71,9 @@ atexit.register(stop_server)
 
 def test():
     import requests
-    port = 6543
-    start_webserver(port, wait_until_started=True)
+    port = 9090
+    ok, port = start_webserver(port, wait_until_started=True)
+    assert ok, "Error tyring to connect, last port tested %d" % port
     response = requests.get('http://localhost:{port}/static/dynsvg.js'.format(
         port=port
     ))
