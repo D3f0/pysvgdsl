@@ -4,6 +4,7 @@ from twisted.web import static, server, resource
 from twisted.internet.error import CannotListenError
 import os
 import atexit
+import sys
 
 
 server_process = None
@@ -12,6 +13,13 @@ server_process = None
 def _webserver(port, outqueue, maxtries=None):
     """Starts a webserver in port"""
     from twisted.internet import reactor
+    from twisted.python import log
+    from twisted.web.websocket import WebSocketHandler
+
+
+    outlog = open('./log.log', 'w+')
+    log.startLogging(outlog)
+
     if maxtries is None:
         maxtries = 20
 
@@ -19,6 +27,7 @@ def _webserver(port, outqueue, maxtries=None):
 
     root = resource.Resource()
     root.putChild("static", static.File(os.path.join(os.getcwd(), 'static')))
+    root.putChild("ws", )
     while maxtries and not connected:
         try:
             reactor.listenTCP(port, server.Site(root))
