@@ -152,7 +152,7 @@ class DSVG(object):
                     }
                 });
                 require(['d3', 'dynsvg'], function (d3, dynsvg) {
-                    var ws = new WebSocket("{{ ws_url }}");
+                    alert("Fooo");
                 }, function (err) {
                     console.error("Error", err);
                 });
@@ -171,6 +171,7 @@ def load_svg(path):
     from server import start_webserver
     # FIXME: Second call needs to get the exiting port
     ok, port = start_webserver()
+    print port
     config_for_ipython = dict(
         static_url='http://localhost:{port}/static/'.format(port=port)
     )

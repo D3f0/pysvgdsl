@@ -1,12 +1,14 @@
 /**
- * [description]
- * @param  {[type]} ) {}          [description]
- * @return {[type]}   [description]
+ * Mantains a RPC connection a webserver
  */
 define(function () {
     var url = 'something internal';
-
+    alert("FoOOO");
     return {
-        url: url
+        makeConnection: function (url) {
+            //var connection = new WebSocket(url);
+
+
+        }
     }
 });
