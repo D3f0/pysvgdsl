@@ -2,9 +2,14 @@
 Functions to be exported
 """
 
+import os
+import sys
 from lxml import etree, cssselect
 from cStringIO import StringIO
 from jinja2 import Template
+import requests
+from lxml.etree import ElementTree
+from itertools import count
 
 
 class SVGNode(object):
@@ -31,6 +36,22 @@ class SVGNode(object):
         pass
 
     __repr__ = __str__
+
+
+# Counter
+_id_counter = count(start=1, step=1)
+
+
+# Generate unique id
+def get_id(prefix='svg', suffix=''):
+    """Generate unique id"""
+    return '-'.join([
+        str(x) for x in filter(bool, [
+            prefix,
+            os.getpid(),
+            _id_counter.next(),
+            suffix,
+        ])])
 
 
 class DSVG(object):
@@ -139,20 +160,26 @@ class DSVG(object):
         if not self.display_config:
             raise Exception("This object does not have a display_config attribute.")
         from IPython.display import HTML
+
+        copy = ElementTree(self.etree.getroot())
+        copy.getroot().attrib['id'] = get_id()
         io = StringIO()
-        self.etree.write(io)
+        copy.write(io)
 
         template = Template('''
             {{svg}}
-            <script tyle="text/javascript">
+            <script type="text/javascript">
                 require.config({
                     paths: {
                         d3: '{{ static_url }}d3',
                         dynsvg: '{{ static_url }}dynsvg'
-                    }
+                    },
+                    // Bust cache
+                    urlArgs: "bust=" + (new Date()).getTime()
                 });
                 require(['d3', 'dynsvg'], function (d3, dynsvg) {
-                    alert("Fooo");
+                    dynsvg.makeConnection('{{ ws_url}}');
+
                 }, function (err) {
                     console.error("Error", err);
                 });
@@ -163,7 +190,15 @@ class DSVG(object):
             svg=io.getvalue(),
             **self.display_config
         )
+        # Debug code
+        sys.stderr.write(output[output.index('<script ')-8:])
         return HTML(output)
+
+    def update(self, elem_id, data):
+        """Raw access to data"""
+        payload = {elem_id: data}
+        req = requests.post(self.display_config['pusher_url'], json=payload)
+        return req
 
 
 def load_svg(path):
@@ -173,6 +208,8 @@ def load_svg(path):
     ok, port = start_webserver()
     print port
     config_for_ipython = dict(
-        static_url='http://localhost:{port}/static/'.format(port=port)
+        static_url='http://localhost:{port}/static/'.format(port=port),
+        ws_url='ws://localhost:{port}/ws'.format(port=port),
+        pusher_url='http://localhost:{port}/pusher'.format(port=port),
     )
     return DSVG(path, display_config=config_for_ipython)
