@@ -2,4 +2,5 @@ rx
 lxml
 cssselect
 twisted>=15.0
-txZMQ
+ipython[notebook]
+requests
