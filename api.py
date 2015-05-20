@@ -162,7 +162,8 @@ class DSVG(object):
         from IPython.display import HTML
 
         copy = ElementTree(self.etree.getroot())
-        copy.getroot().attrib['id'] = get_id()
+        this_id = get_id()
+        copy.getroot().attrib['id'] = this_id
         io = StringIO()
         copy.write(io)
 
@@ -178,7 +179,7 @@ class DSVG(object):
                     urlArgs: "bust=" + (new Date()).getTime()
                 });
                 require(['d3', 'dynsvg'], function (d3, dynsvg) {
-                    dynsvg.makeConnection('{{ ws_url}}');
+                    dynsvg.makeConnection('{{ ws_url}}', '#{{this_id}}');
 
                 }, function (err) {
                     console.error("Error", err);
@@ -188,6 +189,7 @@ class DSVG(object):
 
         output = template.render(
             svg=io.getvalue(),
+            this_id=this_id,
             **self.display_config
         )
         # Debug code
