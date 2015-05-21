@@ -104,10 +104,6 @@ class PusherResource(Resource):
         )
         return "OK!"
 
-    #def render(self, request):
-    #    request.setResponseCode(400)
-    #    return "This resource only accepts POST with JSON content type"
-
 
 class RootResource(Resource):
     def __init__(self, *args):
@@ -124,6 +120,11 @@ class RootResource(Resource):
         """.format(**locals())
 
 
+class APIResource(Resource):
+    def __init__(self, ws_server):
+        self.ws_server = ws_server
+
+
 def build_site(port, ws_path='ws', logger=None):
     """Creates a site instance"""
     static_path = os.path.join(os.getcwd(), 'static')
@@ -136,5 +137,6 @@ def build_site(port, ws_path='ws', logger=None):
     ws = WebSocketResource(factory)
     root.putChild(ws_path, ws)
     root.putChild('pusher', PusherResource(factory))
+    root.putChild('/api', APIResource(ws))
     site = Site(root)
     return site
