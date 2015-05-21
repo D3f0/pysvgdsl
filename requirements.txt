@@ -4,3 +4,4 @@ cssselect
 twisted>=15.0
 ipython[notebook]
 requests
+bunch
