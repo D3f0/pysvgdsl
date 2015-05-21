@@ -10,6 +10,8 @@ from jinja2 import Template
 import requests
 from lxml.etree import ElementTree
 from itertools import count
+from subprocess import call
+from IPython.display import HTML, Javascript, display
 
 
 class SVGNode(object):
@@ -153,13 +155,12 @@ class DSVG(object):
         node = SVGNode(self, node)
         return node
 
-    def display(self):
-        """Show in IPython notebook
-
+    def show(self, show_script=False):
+        """Show SVG in IPython notebook
+        @param show_script bool Shows generated script to *stderr*
         This function should be taken away for reuse outside IPython eventually"""
         if not self.display_config:
             raise Exception("This object does not have a display_config attribute.")
-        from IPython.display import HTML
 
         copy = ElementTree(self.etree.getroot())
         this_id = get_id()
@@ -168,39 +169,51 @@ class DSVG(object):
         copy.write(io)
 
         template = Template('''
-            {{svg}}
-            <script type="text/javascript">
-                require.config({
-                    paths: {
-                        d3: '{{ static_url }}d3',
-                        dynsvg: '{{ static_url }}dynsvg'
-                    },
-                    // Bust cache
-                    urlArgs: "bust=" + (new Date()).getTime()
-                });
-                require(['d3', 'dynsvg'], function (d3, dynsvg) {
-                    dynsvg.makeConnection('{{ ws_url}}', '#{{this_id}}');
+            require.config({
+                paths: {
+                    d3: '{{ static_url }}d3',
+                    dynsvg: '{{ static_url }}dynsvg'
+                },
+                // Bust cache
+                urlArgs: "bust=" + (new Date()).getTime()
+            });
+            require(['d3', 'dynsvg'], function (d3, dynsvg) {
+                dynsvg.makeConnection('{{ ws_url}}', '#{{this_id}}');
 
-                }, function (err) {
-                    console.error("Error", err);
-                });
-            </script>
+            }, function (err) {
+                console.error("Error", err);
+            });
         ''')
 
         output = template.render(
-            svg=io.getvalue(),
             this_id=this_id,
             **self.display_config
         )
-        # Debug code
-        sys.stderr.write(output[output.index('<script ')-8:])
-        return HTML(output)
+
+        if show_script:
+            sys.stderr.write(output)
+
+        display(HTML(io.getvalue()))
+        sys.stderr.write(output)
+        display(Javascript(output))
+
+        # return HTML(output)
 
     def update(self, elem_id, data):
         """Raw access to data"""
         payload = {elem_id: data}
         req = requests.post(self.display_config['pusher_url'], json=payload)
         return req
+
+    def external_edit(self):
+        """Call svg program"""
+        platform = sys.platform
+        if platform == 'darwin':
+            call('')
+        elif 'linux' in platform:
+            raise NotImplemented(platform)
+        elif 'win' in platform:
+            raise NotImplemented(platform)
 
 
 def load_svg(path):
