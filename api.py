@@ -190,17 +190,16 @@ class DSVG(object):
             **self.display_config
         )
 
+        display(HTML(io.getvalue()))
         if show_script:
             sys.stderr.write(output)
-
-        display(HTML(io.getvalue()))
-        sys.stderr.write(output)
         display(Javascript(output))
 
         # return HTML(output)
 
     def update(self, elem_id, data):
-        """Raw access to data"""
+        """Sends update to the client via websocket connection.
+        Websocket connection is made through pusher interface."""
         payload = {elem_id: data}
         req = requests.post(self.display_config['pusher_url'], json=payload)
         return req

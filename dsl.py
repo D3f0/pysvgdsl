@@ -36,9 +36,3 @@ class ValueCollection(object):
         return subject
 
 
-class SVGDSL(object):
-
-    def __init__(self):
-        self.values = ValueCollection()
-        self.formulas = []
-
