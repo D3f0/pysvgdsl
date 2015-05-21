@@ -32,18 +32,13 @@ define(['d3'], function (d3) {
             });
 
         } else {
-
+            console.info("Applying "+updates+" to "+node);
             _.each(updates, function (value, attribute) {
                 if (node.attr('tag') == 'nopaint') {
                     console.info("Skipping");
                     return;
                 }
                 if (attribute == 'text') {
-                    // TODO: Move to serverside(formulas)
-                    if (value.indexOf(' ')==-1 && value.indexOf('.')>-1){
-                        value = parseFloat(value).toFixed(2);
-                    }
-
                     node.text(value);
                 } else {
                     node.style(attribute, value);
@@ -67,14 +62,18 @@ define(['d3'], function (d3) {
         console.log("Message receied");
         console.info(data);
 
-        _.each(data, function (index, updates) {
-            var localNode = node.select('#'+index);
-            if (localNode.localNode.empty()) {
+        _.each(data, function (updates, node_id) {
+            var selector = '#'+node_id;
+            var localNode = node.select(selector);
+            if (!localNode.empty()) {
                 console.info("Updating element ", localNode);
                 applyChanges(localNode, updates)
+            } else {
+                // debugger;
+                console.error(selector+" did not match with any element in "+node);
             }
         });
-        debugger;
+        //debugger;
     }
     function onError(err) {
         console.error("WS error", error);
