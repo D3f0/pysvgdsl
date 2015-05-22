@@ -220,8 +220,8 @@ class MultiAttrNode(object):
         self.subjects[name].on_next(value)
 
     def __getattr__(self, name):
-        print(name)
-        return object.__getattr__(self, name)
+        """Access to attributes by their name"""
+        return self.values[name]
 
     def __str__(self):
         return '<MultiAttrNode {name} {description}>'.format(
@@ -230,6 +230,13 @@ class MultiAttrNode(object):
         )
 
     __repr__ = __str__
+
+    def __dir__(self):
+        """Autocompletion suggestions"""
+        values = list(self.values.keys())
+
+        values.extend(x for x in self.__dict__)
+        return values
 
 
 class SMVEFormulaManager(FormulaManager):
