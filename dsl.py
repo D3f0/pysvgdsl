@@ -76,9 +76,6 @@ class Context(object):
         ns, varname, attribute = name.split('.')
         return self.namespaces[ns][varname][attribute].value
 
-    def get_observable(self, name):
-        """Fully quialified vairable name, for example ai.E4ABAR01.value"""
-
     def __getitem__(self, fqname):
         match = _var_regex.search(fqname)
         assert match, "%s did not work" % fqname
@@ -101,6 +98,10 @@ class Context(object):
         suggestions.append(self.namespaces.keys())
         return suggestions
 
+    def get_observable(self, ns, tag, attr):
+        fqname = '.'.join([ns, tag, attr])
+        self[fqname]
+        import ipdb; ipdb.set_trace()
 
 class FormulaManager(object):
     """Holds formulas"""
@@ -150,9 +151,12 @@ class Formula(object):
         return text.split(self.ASSIGNMENT_CHAR, 1)
 
     def bind_changes(self, variables):
-        for var in variables:
-            var_obj = self.context[var]
-            print("Binding variables of ", var, var_obj)
+        for ns, tag, attr in variables:
+            obs = self.context.get_observable(ns, tag, attr)
+            obs.observe(self.calculate())
+
+    def calculate(self):
+        print("Should recalculate ", self.text)
 
     _text = None
 
@@ -169,7 +173,7 @@ class Formula(object):
     @staticmethod
     def extract_vairables(text):
         """Constructs a regex to extract all variables from formula text"""
-        return [v.group() for v in _var_regex.finditer(text)]
+        return _var_regex.findall(text)
 
     def evaluate(self):
         """target.attribtue = evaluation"""
