@@ -657,8 +657,10 @@ E42VV_00.text=FLOAT((ai.E42VV_00.value-1227)*ai.E42VV_00.escala, 1)
 </div>
 </div>
 </div>
-    </div><div class="fragment" data-fragment-index="21">
-        
+    </div></section>
+    </section><section>
+    <section>
+    
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
@@ -690,8 +692,7 @@ E42VV_00.text=FLOAT((ai.E42VV_00.value-1227)*ai.E42VV_00.escala, 1)
 
 </div>
 </div>
-</div>
-        </div></section>
+</div></section>
     </section><section>
     <section>
     
@@ -700,7 +701,7 @@ E42VV_00.text=FLOAT((ai.E42VV_00.value-1227)*ai.E42VV_00.escala, 1)
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Evaluaci&#243;n">Evaluaci&#243;n<a class="anchor-link" href="#Evaluaci&#243;n">&#182;</a></h1><h2 id="Poor's-man">Poor's man<a class="anchor-link" href="#Poor's-man">&#182;</a></h2><div class="highlight"><pre><span class="k">def</span> <span class="nf">si</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<h1 id="Evaluaci&#243;n">Evaluaci&#243;n<a class="anchor-link" href="#Evaluaci&#243;n">&#182;</a></h1><h2 id="Poor-man's">Poor man's<a class="anchor-link" href="#Poor-man's">&#182;</a></h2><div class="highlight"><pre><span class="k">def</span> <span class="nf">si</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">t</span> <span class="k">if</span> <span class="n">cond</span> <span class="k">else</span> <span class="n">f</span>
 <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">SI</span><span class="o">=</span><span class="n">si</span><span class="p">)</span>
 <span class="nb">eval</span><span class="p">(</span><span class="s">&#39;eg.E42VV_00.fill=SI(ai.E42VV_00.q,6,10)&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
